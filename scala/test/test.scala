@@ -92,23 +92,32 @@ object BST_Specification extends Properties("BST") {
             } else true
         } else true
     }
+    
+    property("delete_correct") = forAll(genTree, genNat) { (bst : BST, a : nat) =>
+        if (correct_fun(bst))
+            correct_fun(delete(a)(bst))
+        else true
+    }
+    
+    property("delete_ismember") = forAll(genTree, genNat) { (bst : BST, el : nat) =>
+        if (correct_fun(bst))
+            isMember(el)(delete(el)(bst)) == false
+        else true
+    }
 
-//Theorem delete_correct :
-//  forall a bst,
-//    correct bst -> correct(delete a bst).
-
-
-//Theorem delete_ismember :
-//  forall bst el,
-//    correct bst -> isMember el (delete el bst) = false.
-
-
-//Theorem delete_size :
-//  forall bst el,
-//    correct bst -> 
-//      (isMember el bst = true -> size (delete el bst) = size bst - 1) /\ 
-//      (isMember el bst = false -> size (delete el bst) = size bst).
-
+    property("delete_size") = forAll(genTree, genNat) { (bst : BST, el : nat) =>
+        if (correct_fun(bst)) {
+            (
+                if(isMember(el)(bst) == true)
+                    size(delete(el)(bst)) == size(bst) - 1
+                else true
+            ) && ( 
+                if(isMember(el)(bst) == false) 
+                    size(delete(el)(bst)) == size(bst)
+                else true
+            )
+        } else true
+    }
 
     private def not_in(l : List[nat])(n : nat): Boolean = l match {
         case Nil => true
