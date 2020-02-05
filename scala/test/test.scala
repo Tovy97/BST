@@ -56,29 +56,42 @@ object BST_Specification extends Properties("BST") {
             )
         } else true
     }
-
-
-//Theorem toList_size :
-//  forall bst,
-//    correct bst -> length (toList bst) = size bst.
-
-//Theorem size_isEmpty :  
-//  forall bst,
-//    correct bst ->
-//    isEmpty bst = true <-> size bst = 0.
-
-
-//Lemma delete_sx :
-//  forall sx dx a el,
-//    correct (Node sx el dx) -> 
-//      el ?= a = Gt -> 
-//      delete a (Node sx el dx) = Node (delete a sx) el dx.
-
-//Lemma delete_dx :
-//  forall sx dx a el,
-//    correct (Node sx el dx) -> 
-//      el ?= a = Lt -> 
-//      delete a (Node sx el dx) = Node sx el (delete a dx).
+    
+    property("toList_size") = forAll(genTree) { bst : BST =>
+         if (correct_fun(bst))
+            toList(bst).size == size(bst)
+         else true
+    }
+    
+    property("size_isEmpty") = forAll(genTree) { bst : BST =>
+        if (correct_fun(bst)) {
+            (
+                if(isEmpty(bst) == true)
+                    size(bst) == 0
+                else true
+            ) && (
+                if(size(bst) == 0)
+                    isEmpty(bst) == true
+                else true
+            )
+         } else true
+    }
+    
+    property("delete_sx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
+        if (correct_fun(Node(sx, el, dx))) {
+            if (compare(el, a) == Gt) {
+                delete(a)(Node(sx, el, dx)) == Node(delete(a)(sx), el, dx)
+            } else true
+        } else true
+    }
+    
+    property("delete_dx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
+        if (correct_fun(Node(sx, el, dx))) {
+            if (compare(el, a) == Lt) {
+                delete(a)(Node(sx, el, dx)) == Node(sx, el, delete(a)(dx))
+            } else true
+        } else true
+    }
 
 //Theorem delete_correct :
 //  forall a bst,
