@@ -137,12 +137,20 @@ object BST_Specification extends Properties("BST") {
             }
     }
 
-//Theorem toList_distinct:
-//  forall bst n,
-//    correct bst -> 
-//    (isMember n bst = true -> only_one (toList bst) n = true) /\
-//    (isMember n bst = false -> not_in (toList bst) n = true).
-
+    property("toList_distinct") = forAll(genTree, genNat) { (bst : BST, n : nat) =>
+        if (correct_fun(bst)) {
+            (
+                if(isMember(n)(bst) == true)
+                    only_one(toList(bst))(n) == true
+                else true
+            ) && (
+                if(isMember(n)(bst) == false) 
+                    not_in(toList(bst))(n) == true
+                else true
+            )
+        }   
+        else true
+    }
 
     private def sorted (l : List[nat]) : Boolean = l match {
         case Nil => true
@@ -156,16 +164,17 @@ object BST_Specification extends Properties("BST") {
                   }
             }
      }
+     
+     property("toList_sorted") = forAll(genTree) { bst : BST =>
+         if (correct_fun(bst))
+            sorted(toList(bst)) == true
+         else true
+     }
 
-//Theorem toList_sorted :
-//  forall bst,
-//    correct bst -> 
-//      sorted (toList bst) = true.
-
-
-//Theorem list_head_last :
-//  forall bst,
-//  correct bst ->
-//    hd_error (toList bst) = getMin bst /\
-//    hd_error (rev (toList bst)) = getMax bst.
+    property("list_head_last") = forAll(genTree) { bst : BST =>
+         if (correct_fun(bst)) {
+            ((toList(bst)).headOption == getMin(bst)) && 
+            ((toList(bst)).reverse.headOption == getMax(bst))
+         } else true
+     }
 }
