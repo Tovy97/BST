@@ -394,6 +394,28 @@ Proof.
   }
 Qed.
 
+Lemma delete_sx :
+  forall sx dx a el,
+    correct (Node sx el dx) -> 
+      el ?= a = Gt -> 
+      delete a (Node sx el dx) = Node (delete a sx) el dx.
+Proof.
+  intros.
+  remember (Node sx el dx) as bst eqn:R.
+  destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
+Qed.
+
+Lemma delete_dx :
+  forall sx dx a el,
+    correct (Node sx el dx) -> 
+      el ?= a = Lt -> 
+      delete a (Node sx el dx) = Node sx el (delete a dx).
+Proof.
+  intros.
+  remember (Node sx el dx) as bst eqn:R.
+  destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
+Qed.
+
 Theorem delete_correct :
   forall a bst,
     correct bst -> correct(delete a bst).
@@ -402,32 +424,34 @@ Proof.
   induction H.
   - constructor.
   - simpl. destruct (el ?= a); constructor.
-  - simpl in *. destruct (el ?= a) eqn:D1.
-    + destruct sdx.
-      * destruct (edx ?= edx) eqn:D2.
-        { destruct (getMin ddx).
-          { constructor. destruct (edx ?= a) eqn:D3.
-            { assumption. }
-            { apply nat_compare_eq in D1. subst. rewrite H0 in D3. discriminate D3. }
-            {  apply nat_compare_eq in D1. subst. rewrite H0 in D3. discriminate D3. }
-            
-            rewrite <- nat_compare_lt in D3.
+  - simpl. destruct (el ?= a) eqn:D.
+    + apply nat_compare_eq in D; subst. simpl in *. rewrite H0 in IHcorrect.
+      
 Admitted.
 
 Theorem delete_ismember :
   forall bst el,
     correct bst -> isMember el (delete el bst) = false.
 Proof.
+  
 Admitted.
 
 Theorem delete_size :
   forall bst el,
     correct bst -> 
-      (isMember el bst = true -> size (delete el bst) = size bst - 1) \/ 
+      (isMember el bst = true -> size (delete el bst) = size bst - 1) /\ 
       (isMember el bst = false -> size (delete el bst) = size bst).
 Proof.
   intros.
-  
+  split; intros.
+  induction H; simpl.
+  - trivial.
+  - inversion H0; subst. destruct (el0 ?= el) eqn : D.
+    + trivial.
+    + inversion H1.
+    + inversion H1.
+  - inversion H0; subst. destruct (el0 ?= el) eqn : D.
+    + 
 Admitted.
 
 
