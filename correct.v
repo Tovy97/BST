@@ -1,4 +1,4 @@
-From LF Require Import BST.
+From FDS Require Import BST.
 
 From Coq Require Import Arith.Arith.
 From Coq Require Import Arith.Compare_dec.
@@ -188,26 +188,6 @@ Proof.
     + apply insert_correct. assumption.
 Qed.
 
-Theorem delete_correct :
-  forall a bst,
-    correct bst -> correct(delete a bst).
-Proof.
-  intros.
-  induction H.
-  - constructor.
-  - simpl. destruct (el ?= a); constructor.
-  - simpl in *. destruct (el ?= a) eqn:D1.
-    + destruct sdx.
-      * destruct (edx ?= edx) eqn:D2.
-        { destruct (getMin ddx).
-          { constructor. destruct (edx ?= a) eqn:D3.
-            { assumption. }
-            { apply nat_compare_eq in D1. subst. rewrite H0 in D3. discriminate D3. }
-            {  apply nat_compare_eq in D1. subst. rewrite H0 in D3. discriminate D3. }
-            
-            rewrite <- nat_compare_lt in D3.
-Admitted.
-
 Theorem insert_ismember :
   forall bst el,
     correct bst -> isMember el (insert el bst) = true.
@@ -309,12 +289,6 @@ Proof.
       ).
 Qed.
 
-Theorem delete_ismember :
-  forall bst el,
-    correct bst -> isMember el (delete el bst) = false.
-Proof.
-Admitted.
-
 Theorem insert_size :
   forall bst el,
     correct bst -> 
@@ -388,16 +362,6 @@ Proof.
           { simpl in *. destruct IHcorrect1. apply H5 in H3. rewrite H3. omega. }
 Qed.
 
-Theorem delete_size :
-  forall bst el,
-    correct bst -> 
-      (isMember el bst = true -> size (delete el bst) = size bst - 1) \/ 
-      (isMember el bst = false -> size (delete el bst) = size bst).
-Proof.
-  intros.
-  
-Admitted.
-
 Theorem toList_size :
   forall bst,
     correct bst -> length (toList bst) = size bst.
@@ -410,6 +374,63 @@ Proof.
   - simpl in *. rewrite <- plus_n_O. rewrite <- IHcorrect. rewrite app_length. trivial.
   - simpl in *. rewrite app_length. rewrite IHcorrect1. simpl. rewrite IHcorrect2. omega.
 Qed.
+
+Theorem size_isEmpty :  
+  forall bst,
+    correct bst ->
+    isEmpty bst = true <-> size bst = 0.
+Proof.
+  intros.
+  split;intros.
+  {
+    destruct H; inversion H0; trivial.
+  } {
+    destruct H.
+      - trivial.
+      - inversion H0.
+      - simpl in *. destruct (size sdx); destruct (size ddx); inversion H0.
+      - simpl in *. destruct (size ssx); destruct (size dsx); inversion H0.
+      - simpl in *. destruct (size ssx); destruct (size dsx); inversion H0.
+  }
+Qed.
+
+Theorem delete_correct :
+  forall a bst,
+    correct bst -> correct(delete a bst).
+Proof.
+  intros.
+  induction H.
+  - constructor.
+  - simpl. destruct (el ?= a); constructor.
+  - simpl in *. destruct (el ?= a) eqn:D1.
+    + destruct sdx.
+      * destruct (edx ?= edx) eqn:D2.
+        { destruct (getMin ddx).
+          { constructor. destruct (edx ?= a) eqn:D3.
+            { assumption. }
+            { apply nat_compare_eq in D1. subst. rewrite H0 in D3. discriminate D3. }
+            {  apply nat_compare_eq in D1. subst. rewrite H0 in D3. discriminate D3. }
+            
+            rewrite <- nat_compare_lt in D3.
+Admitted.
+
+Theorem delete_ismember :
+  forall bst el,
+    correct bst -> isMember el (delete el bst) = false.
+Proof.
+Admitted.
+
+Theorem delete_size :
+  forall bst el,
+    correct bst -> 
+      (isMember el bst = true -> size (delete el bst) = size bst - 1) \/ 
+      (isMember el bst = false -> size (delete el bst) = size bst).
+Proof.
+  intros.
+  
+Admitted.
+
+
 
 Fixpoint not_in (l : list nat) (n : nat): bool :=
   match l with
@@ -544,22 +565,3 @@ Proof.
         * simpl. rewrite  rev_unit. admit.
   }
 Admitted.
-
-Theorem size_isEmpty :  
-  forall bst,
-    correct bst ->
-    isEmpty bst = true <-> size bst = 0.
-Proof.
-  intros.
-  split;intros.
-  {
-    destruct H; inversion H0; trivial.
-  } {
-    destruct H.
-      - trivial.
-      - inversion H0.
-      - simpl in *. destruct (size sdx); destruct (size ddx); inversion H0.
-      - simpl in *. destruct (size ssx); destruct (size dsx); inversion H0.
-      - simpl in *. destruct (size ssx); destruct (size dsx); inversion H0.
-  }
-Qed.
