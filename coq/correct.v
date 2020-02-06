@@ -499,6 +499,81 @@ Proof.
           }
 Qed.
 
+Theorem list_head_last :
+  forall bst,
+  correct bst ->
+    hd_error (toList bst) = getMin bst /\
+    hd_error (rev (toList bst)) = getMax bst.
+Proof.
+  intros.
+  split.
+  {
+    induction H.
+    - trivial.
+    - trivial.
+    - trivial.
+    - simpl in *. destruct ssx eqn:D.
+      + trivial.
+      + destruct (toList (Node b1 n b2) ++ esx :: toList dsx) eqn:D1. 
+        * inversion D1. destruct (toList b1); simpl in *; inversion H2. 
+        * assumption. 
+    - simpl in *. destruct ssx eqn:D.
+      + assumption.
+      + destruct (toList (Node b1 n b2) ++ esx :: toList dsx) eqn:D1. 
+        * inversion D1. destruct (toList b1); simpl in *; inversion H4. 
+        * assumption. 
+  } {
+    induction H.
+    - trivial.
+    - trivial.
+    - simpl in *. destruct ddx eqn:D.
+      + destruct (rev (toList sdx ++ edx :: toList empty)) eqn : D1.
+        * discriminate IHcorrect.
+        * trivial.
+      + destruct (rev (toList sdx ++ edx :: toList (Node b1 n b2))) eqn : D1.
+        * inversion D1. rewrite rev_app_distr in H2. 
+          assert (A: rev (edx :: toList b1 ++ n :: toList b2) = rev (n :: toList b2) ++ rev(edx :: toList b1)).
+            { simpl. rewrite rev_app_distr. simpl. rewrite  app_assoc. trivial. }
+            { rewrite A in H2. rewrite <- app_assoc in H2. destruct (toList b2).
+              { simpl in *. discriminate H2. }
+              { simpl in *. rewrite <- app_assoc in H2. rewrite <- app_assoc in H2. destruct (rev l); inversion  H2. }
+            }
+        * simpl in *. assumption.
+    - simpl in *. destruct dsx eqn:D.
+      + simpl. rewrite rev_app_distr. trivial.
+      + simpl. rewrite rev_app_distr. trivial.
+    - simpl in *. destruct ddx eqn:D.
+      + destruct (rev (toList sdx ++ edx :: toList empty)) eqn : D1.
+        * discriminate IHcorrect2.
+        * simpl in *. destruct dsx eqn:D2.
+          { simpl. repeat(rewrite rev_app_distr; simpl). trivial. }
+          { simpl. repeat(rewrite rev_app_distr; simpl). trivial. }
+      + destruct (rev (toList sdx ++ edx :: toList (Node b1 n b2))) eqn : D1.
+        * inversion D1. rewrite rev_app_distr in H4. 
+          assert (A: rev (edx :: toList b1 ++ n :: toList b2) = rev (n :: toList b2) ++ rev(edx :: toList b1)).
+            { simpl. rewrite rev_app_distr. simpl. rewrite  app_assoc. trivial. }
+            { rewrite A in H4. rewrite <- app_assoc in H4. destruct (toList b2).
+              { simpl in *. discriminate H4. }
+              { simpl in *. rewrite <- app_assoc in H4. rewrite <- app_assoc in H4. destruct (rev l); inversion  H4. }
+            }
+        * inversion D1. rewrite rev_app_distr in H4.  
+          assert (A: rev (edx :: toList b1 ++ n :: toList b2) = rev (n :: toList b2) ++ rev(edx :: toList b1)).
+            { simpl. rewrite rev_app_distr. simpl. rewrite  app_assoc. trivial. }
+            { rewrite A in H4. rewrite <- app_assoc in H4. simpl. destruct (toList b2).
+              {  simpl. repeat (rewrite rev_app_distr; simpl).
+                rewrite <- H4 in IHcorrect2. simpl in IHcorrect2. assumption.
+              }
+              {
+                simpl. repeat (rewrite rev_app_distr; simpl).
+                simpl. simpl in H4. 
+                rewrite <- app_assoc in H4. rewrite <- app_assoc in H4. destruct (rev l0).
+                { inversion H4. rewrite <- H4 in IHcorrect2. simpl in *. subst. assumption.  }
+                { inversion H4. rewrite <- H4 in IHcorrect2. simpl in *. subst. assumption.  }
+              }
+            }
+  }
+Qed.
+
 Theorem delete_correct :
   forall a bst,
     correct bst -> correct(delete a bst).
@@ -507,7 +582,7 @@ Proof.
   induction H.
   - constructor.
   - simpl. destruct (el ?= a); constructor.
-  - 
+  - destruct (el ?= a) eqn : D.
       
 Admitted.
 
@@ -622,52 +697,3 @@ Proof.
         { discriminate IHcorrect. }
 Admitted.
 
-Theorem list_head_last :
-  forall bst,
-  correct bst ->
-    hd_error (toList bst) = getMin bst /\
-    hd_error (rev (toList bst)) = getMax bst.
-Proof.
-  intros.
-  split.
-  {
-    induction H.
-    - trivial.
-    - trivial.
-    - trivial.
-    - simpl in *. destruct ssx eqn:D.
-      + trivial.
-      + destruct (toList (Node b1 n b2) ++ esx :: toList dsx) eqn:D1. 
-        * inversion D1. destruct (toList b1); simpl in *; inversion H2. 
-        * assumption. 
-    - simpl in *. destruct ssx eqn:D.
-      + assumption.
-      + destruct (toList (Node b1 n b2) ++ esx :: toList dsx) eqn:D1. 
-        * inversion D1. destruct (toList b1); simpl in *; inversion H4. 
-        * assumption. 
-  } {
-    induction H.
-    - trivial.
-    - trivial.
-    - simpl in *. destruct ddx eqn:D.
-      + destruct (rev (toList sdx ++ edx :: toList empty)) eqn : D1.
-        * discriminate IHcorrect.
-        * trivial.
-      + destruct (rev (toList sdx ++ edx :: toList (Node b1 n b2))) eqn : D1.
-        * inversion D1. rewrite rev_app_distr in H2. 
-          assert (A: rev (edx :: toList b1 ++ n :: toList b2) = rev (n :: toList b2) ++ rev(edx :: toList b1)).
-            { simpl. rewrite rev_app_distr. simpl. rewrite  app_assoc. trivial. }
-            { rewrite A in H2. rewrite <- app_assoc in H2. destruct (toList b2).
-              { simpl in *. discriminate H2. }
-              { simpl in *. rewrite <- app_assoc in H2. rewrite <- app_assoc in H2. destruct (rev l); inversion  H2. }
-            }
-        * simpl in *. assumption.
-    - simpl in *. destruct dsx eqn:D.
-      + simpl. rewrite rev_app_distr. trivial.
-      + simpl. rewrite rev_app_distr. trivial.
-    - simpl in *. destruct ddx eqn:D.
-      + simpl. rewrite rev_app_distr. simpl.  rewrite  rev_unit. trivial.
-      + simpl. rewrite rev_app_distr. simpl. destruct dsx.
-        * simpl. rewrite  rev_unit. admit.
-  }
-Admitted.
