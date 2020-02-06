@@ -106,6 +106,22 @@ object BST_Specification extends Properties("BST") {
         } else true
     }
     
+    property("delete2_sx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
+        if (correct_fun(Node(sx, el, dx))) {
+            if (compare(el, a) == Gt) {
+                delete2(a)(Node(sx, el, dx)) == Node(delete2(a)(sx), el, dx)
+            } else true
+        } else true
+    }
+
+    property("delete2_dx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
+        if (correct_fun(Node(sx, el, dx))) {
+            if (compare(el, a) == Lt) {
+                delete2(a)(Node(sx, el, dx)) == Node(sx, el, delete2(a)(dx))
+            } else true
+        } else true
+    }
+    
     property("delete_correct") = forAll(genTree, genNat) { (bst : BST, a : nat) =>
         if (correct_fun(bst))
             correct_fun(delete(a)(bst))

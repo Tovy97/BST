@@ -118,6 +118,28 @@ Proof.
     + assumption.
 Qed.
 
+Lemma delete2_sx :
+  forall sx dx a el,
+    correct (Node sx el dx) -> 
+      el ?= a = Gt -> 
+      delete2 a (Node sx el dx) = Node (delete2 a sx) el dx.
+Proof.
+  intros.
+  remember (Node sx el dx) as bst eqn:R.
+  destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
+Qed.
+
+Lemma delete2_dx :
+  forall sx dx a el,
+    correct (Node sx el dx) -> 
+      el ?= a = Lt -> 
+      delete2 a (Node sx el dx) = Node sx el (delete2 a dx).
+Proof.
+  intros.
+  remember (Node sx el dx) as bst eqn:R.
+  destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
+Qed.
+
 Theorem insert_correct :
   forall a bst,
     correct bst -> correct(insert a bst).
