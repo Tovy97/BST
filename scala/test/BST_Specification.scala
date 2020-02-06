@@ -90,18 +90,18 @@ object BST_Specification extends Properties("BST") {
          } else true
     }
     
-    property("delete_sx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
-        if (correct_fun(Node(sx, el, dx))) {
-            if (compare(el, a) == Gt) {
-                delete(a)(Node(sx, el, dx)) == Node(delete(a)(sx), el, dx)
-            } else true
-        } else true
+    property("delete_equals_delete2") = forAll(genTree, genNat) { (bst : BST, el : nat) =>
+        if (correct_fun(bst))
+            BSTequals(delete(el)(bst))(delete2(el)(bst)) == true
+        else true
     }
     
-    property("delete_dx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
-        if (correct_fun(Node(sx, el, dx))) {
-            if (compare(el, a) == Lt) {
-                delete(a)(Node(sx, el, dx)) == Node(sx, el, delete(a)(dx))
+    property("insert_ismember2") = forAll(genTree, genNat, genNat) { (bst : BST, a : nat, b : nat) =>
+        if (correct_fun(bst)) {
+            if (isMember(a)(bst) == false) {
+                if (b != a)
+                    isMember(a)(insert(b)(bst)) == false
+                else true
             } else true
         } else true
     }

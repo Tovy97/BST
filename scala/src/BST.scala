@@ -70,7 +70,7 @@ object bst_operation {
             }
     }
 
-    def delete(El : nat)(bst : BST) : BST = bst match {
+    def delete2(El : nat)(bst : BST) : BST = bst match {
         case Empty => bst
         case Node(sx, el, dx) =>
             compare(el, El) match {
@@ -83,7 +83,23 @@ object bst_operation {
               case Gt => Node(delete(El)(sx), el, dx)
             }
     }
+    
+    def delete(El : nat)(bst : BST) : BST =
+        fromList(toList(bst).filter(El != _))
 
+    private def list_beq(l1 : List[nat]) (l2 : List[nat]) : Boolean = (l1, l2) match {
+        case (Nil, Nil) => true
+        case (_ :: _, Nil) => false
+        case (Nil, _ :: _) => false
+        case (h1 :: t1, h2 :: t2) => 
+            h1 == h2 match {
+              case true => list_beq(t1)(t2)
+              case false => false
+            }
+    }
+
+    def BSTequals(bst1 : BST)(bst2 : BST) : Boolean = list_beq(toList(bst1))(toList(bst2))
+  
     def correct_fun(bst : BST) : Boolean = bst match {
         case Empty => true
         case Node(sx, e, dx) => (sx, dx) match {

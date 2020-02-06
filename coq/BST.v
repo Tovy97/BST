@@ -80,7 +80,7 @@ Fixpoint isMember (El : nat) (bst : BST) : bool :=
         end
   end.
 
-Fixpoint delete (El : nat) (bst : BST) : BST :=
+Fixpoint delete2 (El : nat) (bst : BST) : BST :=
   match bst with
     | Empty => bst
     | Node sx el dx =>
@@ -88,12 +88,30 @@ Fixpoint delete (El : nat) (bst : BST) : BST :=
           | Eq => 
               match getMin(dx) with
                 | None => sx
-                | Some min => Node sx min (delete min dx)
+                | Some min => Node sx min (delete2 min dx)
               end
-          | Lt => Node sx el (delete El dx)
-          | Gt => Node (delete El sx) el dx
+          | Lt => Node sx el (delete2 El dx)
+          | Gt => Node (delete2 El sx) el dx
         end
   end.
+
+Fixpoint list_beq(l1 : list nat) (l2 : list nat) : bool :=
+  match (l1, l2) with
+    | (nil, nil) => true
+    | (_ :: _, nil) => false
+    | (nil, _ :: _) => false
+    | (h1 :: t1, h2 :: t2) => 
+        match beq_nat h1 h2 with
+          | true => list_beq t1 t2
+          | false => false
+        end
+  end.
+
+Definition BSTequals(bst1 : BST)(bst2 : BST) : bool :=
+  list_beq (toList bst1) (toList bst2).
+
+Definition delete (El : nat) (bst : BST) : BST :=
+  fromList(filter (fun el => negb (beq_nat el El)) (toList bst)).
 
 Fixpoint correct_fun (bst : BST) : bool :=
   match bst with
