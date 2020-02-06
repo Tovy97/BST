@@ -1,4 +1,5 @@
 #!/bin/bash
 
+scalac -cp ".:lib/scalacheck_2.11-1.14.0.jar" src/*.scala 
 scalac -cp ".:lib/scalacheck_2.11-1.14.0.jar" test/BST_Specification.scala 
 scala -cp ".:lib/scalacheck_2.11-1.14.0.jar" test.BST_Specification

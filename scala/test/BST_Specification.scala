@@ -17,7 +17,15 @@ object BST_Specification extends Properties("BST") {
         list <- Gen.listOf[nat](genNat)
     } yield fromList(list)
     
-    property("correct_gen") = forAll(genTree) { bst : BST =>
+    property("correct_gen1") = forAll(genNat) { n : nat =>
+        n >= O
+    }
+    
+    property("correct_gen2") = forAll(genTree) { bst : BST =>
+        size(bst) >= O
+    }
+    
+    property("correct_gen3") = forAll(genTree) { bst : BST =>
         correct_fun(bst)
     }
   
@@ -51,7 +59,7 @@ object BST_Specification extends Properties("BST") {
                 else true
             ) && (
                 if (isMember(el)(bst) == false) 
-                    size(insert(el)(bst)) == size(bst) + 1
+                    size(insert(el)(bst)) == toNat(size(bst) + 1)
                 else true
             )
         } else true
@@ -59,7 +67,7 @@ object BST_Specification extends Properties("BST") {
     
     property("toList_size") = forAll(genTree) { bst : BST =>
          if (correct_fun(bst))
-            toList(bst).size == size(bst)
+            toNat(toList(bst).size) == size(bst)
          else true
     }
     
@@ -67,10 +75,10 @@ object BST_Specification extends Properties("BST") {
         if (correct_fun(bst)) {
             (
                 if(isEmpty(bst) == true)
-                    size(bst) == 0
+                    size(bst) == O
                 else true
             ) && (
-                if(size(bst) == 0)
+                if(size(bst) == O)
                     isEmpty(bst) == true
                 else true
             )
@@ -109,7 +117,7 @@ object BST_Specification extends Properties("BST") {
         if (correct_fun(bst)) {
             (
                 if(isMember(el)(bst) == true)
-                    size(delete(el)(bst)) == size(bst) - 1
+                    size(delete(el)(bst)) == toNat(size(bst) - 1)
                 else true
             ) && ( 
                 if(isMember(el)(bst) == false) 
