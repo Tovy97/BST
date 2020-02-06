@@ -77,10 +77,10 @@ object bst_operation {
               case Eq => 
                   getMin(dx) match {
                     case None => sx
-                    case Some(min) => Node(sx, min, (delete(min)(dx)))
+                    case Some(min) => Node(sx, min, (delete2(min)(dx)))
                   }
-              case Lt => Node(sx, el, (delete(El)(dx)))
-              case Gt => Node(delete(El)(sx), el, dx)
+              case Lt => Node(sx, el, (delete2(El)(dx)))
+              case Gt => Node(delete2(El)(sx), el, dx)
             }
     }
     
