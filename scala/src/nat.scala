@@ -18,8 +18,8 @@ object nat_operation {
     implicit def toString(n : nat) : String = toInt(n).toString
  
     implicit def compare(n : nat, m : nat) : comparison = 
-        if (n - m < 0) Lt
-        else if (n - m == 0) Eq
+        if (n < m) Lt
+        else if (n == m) Eq
         else Gt
     
     implicit def toNat(i : Int) : nat = if (i <= 0) O else S(i - 1)    

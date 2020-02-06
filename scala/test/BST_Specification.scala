@@ -1,7 +1,6 @@
 package test
 
 import org.scalacheck.Prop.forAll
-import org.scalacheck.Test.{Parameters, Result, checkProperties}
 import org.scalacheck.{Arbitrary, Gen, Properties}
 import src._
 import src.bst_operation._
