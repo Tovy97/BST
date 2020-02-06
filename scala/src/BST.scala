@@ -2,6 +2,7 @@ package src
 
 import scala.language.implicitConversions
 import src.nat_operation._
+import scala.math.max
 
 sealed trait BST 
 case class Node(sx : BST, el : nat, dx : BST) extends BST
@@ -25,6 +26,11 @@ object bst_operation {
     def fromList(l : List[nat]) : BST = l match {
         case Nil => Empty
         case h :: t => insert(h)(fromList(t))
+    }
+    
+    def height(bst:BST) : nat = bst match {
+        case Empty => 0
+        case Node(sx, _, dx) => max(height(sx), height(dx)) + 1
     }
     
     def size(bst : BST) : nat = bst match {

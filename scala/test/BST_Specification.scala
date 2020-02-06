@@ -27,6 +27,12 @@ object BST_Specification extends Properties("BST") {
     property("correct_gen3") = forAll(genTree) { bst : BST =>
         correct_fun(bst)
     }
+    
+    property("max_height") = forAll(genTree) { bst : BST => 
+        if (correct_fun(bst))            
+            (compare(height(bst), size(bst)) == Lt || compare(height(bst), size(bst)) == Eq)
+        else true
+    }
   
     property("child_correct") = forAll(genTree, genTree, genNat) { (sx : BST, dx : BST, el : nat) =>
         if (correct_fun(Node(sx, el, dx)))

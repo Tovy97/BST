@@ -9,6 +9,7 @@ From Coq Require Import Bool.Bool.
 From Coq Require Import Lists.List.
 Import ListNotations.
 Require Import Omega.
+Require Import Lia.
 
 Theorem correct_iif_correct_fun :
   forall bst,
@@ -416,6 +417,88 @@ Proof.
   destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
 Qed.
 
+Theorem max_height :
+  forall bst,
+    correct bst ->
+    (height bst ?= size(bst) = Lt \/ height bst ?= size(bst) = Eq).
+Proof.
+  intros.
+    induction H; simpl in *.
+    - right. trivial.
+    - right. trivial.
+    - destruct IHcorrect.
+      + left. 
+        destruct (size sdx + size ddx + 1) eqn : D.
+        * discriminate H1.
+        * simpl in *. destruct n.
+          { simpl. assumption. }
+          { simpl. rewrite plus_comm. simpl. assumption. }
+      + right.
+        destruct (size sdx + size ddx + 1) eqn : D.
+        * discriminate H1.
+        * simpl in *. destruct n.
+          { simpl. assumption. }
+          { simpl. rewrite plus_comm. simpl. assumption. }
+    - destruct IHcorrect.
+      + left. rewrite <- plus_n_O.
+        destruct (size ssx + size dsx + 1) eqn : D.
+        * discriminate H1.
+        * simpl in *. destruct n.
+          { simpl. assumption. }
+          { simpl. rewrite plus_comm. simpl. assumption. }
+      + right. rewrite <- plus_n_O.
+        destruct (size ssx + size dsx + 1) eqn : D.
+        * discriminate H1.
+        * simpl in *. destruct n.
+          { simpl. assumption. }
+          { simpl. rewrite plus_comm. simpl. assumption. }
+    - destruct IHcorrect1;destruct IHcorrect2.
+      + left. destruct (size ssx + size dsx + 1).
+        * discriminate H3. 
+        * simpl in *. destruct (size sdx + size ddx + 1).
+          { discriminate H4. }
+          { destruct n; destruct n0; 
+              simpl;
+              rewrite <- nat_compare_lt;
+              rewrite <- nat_compare_lt in H3;
+              rewrite <- nat_compare_lt in H4;
+              lia.
+          }
+       + left. destruct (size ssx + size dsx + 1).
+        * discriminate H3. 
+        * simpl in *. destruct (size sdx + size ddx + 1).
+          { discriminate H4. }
+          { destruct n; destruct n0;
+              simpl;
+              rewrite <- nat_compare_lt in H3;
+              rewrite <- nat_compare_lt;
+              apply nat_compare_eq in H4;
+              lia.
+          }
+      + left. destruct (size ssx + size dsx + 1).
+        * discriminate H3. 
+        * simpl in *. destruct (size sdx + size ddx + 1).
+          { discriminate H4. }
+          { destruct n; destruct n0;
+              simpl;
+              rewrite <- nat_compare_lt in H4;
+              rewrite <- nat_compare_lt;
+              apply nat_compare_eq in H3;
+              lia.
+          }
+      + left. destruct (size ssx + size dsx + 1).
+        * discriminate H3. 
+        * simpl in *. destruct (size sdx + size ddx + 1).
+          { discriminate H4. }
+          { destruct n; destruct n0;
+              simpl;
+              apply nat_compare_eq in H4;
+              rewrite <- nat_compare_lt;
+              apply nat_compare_eq in H3;
+              lia.
+          }
+Qed.
+
 Theorem delete_correct :
   forall a bst,
     correct bst -> correct(delete a bst).
@@ -424,8 +507,7 @@ Proof.
   induction H.
   - constructor.
   - simpl. destruct (el ?= a); constructor.
-  - simpl. destruct (el ?= a) eqn:D.
-    + apply nat_compare_eq in D; subst. simpl in *. rewrite H0 in IHcorrect.
+  - 
       
 Admitted.
 

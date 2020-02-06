@@ -1,0 +1,3 @@
+#!/bin/bash
+
+coqc -Q . FDS *.v

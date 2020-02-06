@@ -31,6 +31,12 @@ Fixpoint fromList (l : list nat) : BST :=
     | h :: t => insert h (fromList t)
   end.
 
+Fixpoint height (bst : BST) : nat :=
+  match bst with
+    | Empty => 0
+    | Node sx _ dx => 1 + (max (height sx) (height dx))
+  end.
+
 Fixpoint size (bst : BST) : nat :=
   match bst with
     | Empty => 0
