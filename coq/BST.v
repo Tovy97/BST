@@ -113,49 +113,26 @@ Definition BSTequals(bst1 : BST)(bst2 : BST) : bool :=
 Definition delete (El : nat) (bst : BST) : BST :=
   fromList(filter (fun el => negb (beq_nat el El)) (toList bst)).
 
+Definition correct_on_sx(root : nat)(sx : BST) : bool :=
+  forallb (fun el => el <? root)(toList sx).
+
+Definition correct_on_dx(root : nat)(dx : BST) : bool :=
+  forallb (fun el => root <? el)(toList dx).
+
 Fixpoint correct_fun (bst : BST) : bool :=
   match bst with
     | Empty => true
     | Node sx e dx =>
-        match (sx, dx) with
-          | (Empty, Empty) => true
-          | (Node ssx esx dsx, Empty) => 
-              match esx ?= e with
-                | Lt => correct_fun sx
-                | _ => false
-              end
-          | (Empty, Node sdx edx ddx) => 
-              match edx ?= e with
-                | Gt => correct_fun dx
-                | _ => false
-              end
-          | (Node ssx esx dsx, Node sdx edx ddx) => 
-              match (esx ?= e, edx ?= e) with
-                | (Lt, Gt) => (correct_fun sx) && (correct_fun dx)
-                | _ => false
-              end
-        end
+        correct_on_sx e sx && correct_fun sx &&
+        correct_on_dx e dx && correct_fun dx
   end.
 
 Inductive correct : BST -> Prop :=
   | cor_empty : correct Empty
-  | cor_node_e_e : 
-      forall el,
-        correct (Node Empty el Empty)
-  | cor_node_e_dx :
-      forall el sdx edx ddx,
-        correct (Node sdx edx ddx) ->
-        edx ?= el = Gt ->
-        correct (Node Empty el (Node sdx edx ddx))
-  | cor_node_sx_e :
-      forall ssx esx dsx el,
-        correct (Node ssx esx dsx) ->
-        esx ?= el = Lt ->
-        correct (Node (Node ssx esx dsx) el Empty)
-  | cor_node :
-      forall ssx esx dsx el sdx edx ddx,
-        correct (Node ssx esx dsx) ->
-        correct (Node sdx edx ddx) ->
-        edx ?= el = Gt ->
-        esx ?= el = Lt ->
-        correct (Node (Node ssx esx dsx) el (Node sdx edx ddx)).
+  | cor_node : 
+      forall sx e dx,
+        correct_on_sx e sx = true ->
+        correct sx ->
+        correct_on_dx e dx = true ->
+        correct dx ->
+        correct (Node sx e dx).

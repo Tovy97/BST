@@ -19,84 +19,15 @@ Proof.
   split; intros.
   {
     induction H; trivial.
-    - simpl. 
-      destruct (edx ?= el) eqn : D. 
-      + discriminate H0. 
-      + discriminate H0. 
-      + simpl in IHcorrect. assumption.
-    - simpl. 
-      destruct (esx ?= el) eqn : D. 
-      + discriminate H0.
-      + simpl in IHcorrect. assumption.
-      + discriminate H0. 
-    - simpl. 
-      destruct (esx ?= el) eqn : D1. 
-      + discriminate H2.
-      + destruct (edx ?= el) eqn : D2.
-        * discriminate H1.
-        * discriminate H1.
-        * simpl in IHcorrect1. rewrite IHcorrect1. simpl in IHcorrect2. assumption.
-      + discriminate H2.
+    simpl.
+    repeat (rewrite andb_true_iff; split); assumption.
   } {
-    induction bst.
-    - constructor.
-    - destruct bst1; destruct bst2.
-      + constructor.
-      + constructor. 
-        * apply IHbst2. simpl in H.
-          destruct (n0 ?= n).
-          { discriminate H. }
-          { discriminate H. }
-          { simpl. assumption. }
-        * simpl in H. destruct (n0 ?= n).
-          { discriminate H. }
-          { discriminate H. }
-          { trivial. }
-      + constructor.
-        * apply IHbst1. simpl in H.
-          destruct (n0 ?= n).
-          { discriminate H. } 
-          { simpl. assumption. }
-          { discriminate H. }
-        * simpl in H. destruct (n0 ?= n).
-          { discriminate H. }
-          { trivial. }
-          { discriminate H. }
-      + constructor.
-        * apply IHbst1. simpl in H.
-          destruct (n0 ?= n).
-          { discriminate H. }
-          { destruct (n1 ?= n).
-            { discriminate H. }
-            { discriminate H. }
-            { rewrite andb_true_iff in H. destruct H. simpl. assumption. }
-          }
-          { discriminate H. }
-        * apply IHbst2. simpl in H.
-          destruct (n0 ?= n).
-          { discriminate H. }
-          { destruct (n1 ?= n).
-            { discriminate H. }
-            { discriminate H. }
-            { rewrite andb_true_iff in H. destruct H. simpl. assumption. }
-          }
-          { discriminate H. }
-        * simpl in H. destruct (n0 ?= n).
-          { discriminate H. }
-          { destruct (n1 ?= n).
-            { discriminate H. }
-            { discriminate H. }
-            { trivial. }
-          }
-          { discriminate H. }
-        * simpl in H. destruct (n0 ?= n).
-          { discriminate H. }
-          { destruct (n1 ?= n).
-            { discriminate H. }
-            { discriminate H. }
-            { trivial. }
-          }
-          { discriminate H. }
+    induction bst; constructor;
+    simpl in *;
+    repeat (rewrite andb_true_iff in H);
+    repeat (destruct H); trivial.
+    - apply IHbst1. assumption.
+    - apply IHbst2. assumption.
   }
 Qed.
 
@@ -105,20 +36,10 @@ Theorem child_correct :
     correct (Node sx el dx) -> correct sx /\ correct dx.
 Proof.
   intros.
-  split.
-  - inversion H; subst.
-    + constructor.
-    + constructor.
-    + assumption.
-    + assumption.
-  - inversion H; subst.
-    + constructor.
-    + assumption.
-    + constructor.
-    + assumption.
+  split; inversion H; subst; assumption.
 Qed.
 
-Lemma delete2_sx :
+Theorem delete2_sx :
   forall sx dx a el,
     correct (Node sx el dx) -> 
       el ?= a = Gt -> 
@@ -129,7 +50,7 @@ Proof.
   destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
 Qed.
 
-Lemma delete2_dx :
+Theorem delete2_dx :
   forall sx dx a el,
     correct (Node sx el dx) -> 
       el ?= a = Lt -> 
@@ -146,58 +67,14 @@ Theorem insert_correct :
 Proof.
   intros.
   induction H; simpl.
-  - constructor.
-  - destruct (el ?= a) eqn:D.
-    + constructor.
-    + constructor. 
-      * constructor.
-      * apply nat_compare_lt in D. apply nat_compare_gt in D. assumption. 
-    + constructor.
-      * constructor. 
-      * apply nat_compare_gt in D. apply nat_compare_lt in D. assumption.
-  - destruct (el ?= a) eqn:D1.
+  - constructor; trivial; try constructor.
+  - destruct (e ?= a) eqn:D.
     + constructor; assumption.
-    + simpl in IHcorrect. destruct (edx ?= a) eqn:D2; constructor; assumption.
-    + simpl in IHcorrect. destruct (edx ?= a) eqn:D2.
-      * constructor. 
-        { constructor. }
-        { assumption. }
-        { assumption. }
-        { apply  nat_compare_Gt_gt in D1. apply nat_compare_lt in D1. assumption. }
-      * constructor.
-        { constructor. }
-        { assumption. }
-        {  assumption.  }
-        { apply  nat_compare_Gt_gt in D1. apply nat_compare_lt in D1. assumption. } 
-      * constructor.
-        { constructor. }
-        { assumption. }
-        { assumption.  }
-        { apply  nat_compare_Gt_gt in D1. apply nat_compare_lt in D1. assumption. }
-  - destruct (el ?= a) eqn:D1.
-    + constructor; assumption.
-    + simpl in IHcorrect. destruct (esx ?= a) eqn:D2.
-      * constructor. 
-        { assumption. }
-        { constructor. }
-        { apply nat_compare_lt in D1. apply nat_compare_gt in D1. assumption. }
-        { assumption.  }
-      * constructor.
-        { assumption. }
-        { constructor. }
-        { apply nat_compare_lt in D1. apply nat_compare_gt in D1. assumption. }
-        { assumption. } 
-      * constructor.
-        { assumption. }
-        { constructor. }
-        { apply nat_compare_lt in D1. apply nat_compare_gt in D1. assumption. }
-        { assumption. } 
-    + simpl in IHcorrect. destruct (esx ?= a) eqn:D2; constructor; assumption.
-  - destruct (el ?= a) eqn:D1.
-    + constructor; assumption.
-    + simpl in IHcorrect2. destruct (edx ?= a) eqn:D2; constructor; assumption.
-    + simpl in IHcorrect1. destruct (esx ?= a) eqn:D2; constructor; assumption.
-Qed.
+    + constructor; try assumption.
+      admit.
+    + constructor; try assumption. apply nat_compare_gt in D.
+      admit.
+Admitted.
 
 Theorem fromList_correct :
   forall l,
@@ -206,9 +83,7 @@ Proof.
   intros.
   induction l.
   - simpl. constructor.
-  - simpl. destruct (fromList l). 
-    + simpl. constructor.
-    + apply insert_correct. assumption.
+  - simpl.  apply insert_correct. assumption.
 Qed.
 
 Theorem insert_ismember :
@@ -221,95 +96,10 @@ Proof.
     + trivial.
     + rewrite <- nat_compare_lt in D. omega.
     + rewrite <- nat_compare_gt in D. omega.
-  - simpl. destruct (el0 ?= el) eqn:D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * discriminate D.
-      * discriminate D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * destruct (el ?= el) eqn:D2.
-        { trivial. }
-        { rewrite <- nat_compare_lt in D2. omega. }
-        { rewrite <- nat_compare_gt in D2. omega. }
-      * discriminate D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * discriminate D.
-      * destruct (el ?= el) eqn:D2.
-        { trivial. }
-        { rewrite <- nat_compare_lt in D2. omega. }
-        { rewrite <- nat_compare_gt in D2. omega. }
-  - simpl. destruct (el0 ?= el) eqn:D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * discriminate D.
-      * discriminate D.
-    + simpl in *. destruct (edx ?= el) eqn : D1.
-      * simpl in *. destruct (el0 ?= el) eqn:D2.
-        { trivial. } 
-        { assumption. }
-        { discriminate D. }
-      * simpl in *. destruct (el0 ?= el) eqn:D2.
-        { trivial. } 
-        { assumption. }
-        { discriminate D. }
-      * simpl in *. destruct (el0 ?= el) eqn:D2.
-        { trivial. } 
-        { assumption. }
-        { discriminate D. }
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * discriminate D.
-      * simpl. destruct (el ?= el) eqn:D2.
-        { trivial. }
-        { rewrite <- nat_compare_lt in D2. omega. }
-        { rewrite <- nat_compare_gt in D2. omega. }
-  - simpl. destruct (el0 ?= el) eqn:D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * discriminate D.
-      * discriminate D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * simpl. destruct (el ?= el) eqn:D2.
-        { trivial. }
-        { rewrite <- nat_compare_lt in D2. omega. }
-        { rewrite <- nat_compare_gt in D2. omega. }
-      * discriminate D.
-    + simpl in *. destruct (esx ?= el) eqn : D1.
-      * simpl in *. destruct (el0 ?= el) eqn:D2.
-        { trivial. }  
-        { discriminate D. }
-        { assumption. }
-      * simpl in *. destruct (el0 ?= el) eqn:D2.
-        { trivial. } 
-        { discriminate D. }
-        { assumption. }
-      * simpl in *. destruct (el0 ?= el) eqn:D2.
-        { trivial. } 
-        { discriminate D. }
-        { assumption. }
-  - simpl. destruct (el0 ?= el) eqn:D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * discriminate D.
-      * discriminate D.
-    + simpl. destruct (el0 ?= el) eqn:D1.
-      * trivial.
-      * simpl. destruct (el ?= el) eqn:D2.
-        { trivial. }
-        { rewrite <- nat_compare_lt in D2. omega. }
-        { rewrite <- nat_compare_gt in D2. omega. }
-      * discriminate D.
-    + simpl in *. destruct (esx ?= el) eqn : D1; destruct (edx ?= el) eqn : D2; 
-      repeat (
-        simpl in *; 
-        destruct (el0 ?= el); 
-        trivial; 
-        try discriminate D; 
-        try assumption
-      ).
+  - simpl. destruct (e ?= el) eqn:D.
+    + simpl. rewrite D. trivial. 
+    + simpl. rewrite D. trivial. 
+    + simpl. rewrite D. trivial.
 Qed.
 
 Theorem insert_size1 :
@@ -320,34 +110,10 @@ Proof.
   intros.
   induction H.
   - simpl in H0. discriminate H0.
-  - simpl in *. destruct (el0 ?= el) eqn : D.
+  - simpl in *. destruct (e ?= el) eqn : D.
       * trivial.
-      * discriminate H0.
-      * discriminate H0.
-  - simpl in *. destruct (el0 ?= el) eqn : D.
-      * trivial.
-      * simpl in *. destruct (edx ?= el) eqn : D2.
-        { trivial. }
-        { simpl in *. destruct IHcorrect; try assumption; trivial. }
-        { simpl in *. destruct IHcorrect; try assumption; trivial. }
-      * discriminate H0.
-  - simpl in *. destruct (el0 ?= el) eqn : D.
-      * trivial.
-      * discriminate H0.
-      * simpl in *. destruct (esx ?= el) eqn : D2.
-        { trivial. }
-        { simpl in *. destruct IHcorrect; try assumption; trivial. }
-        { simpl in *. destruct IHcorrect; try assumption; trivial. }
-    - simpl in *. destruct (el0 ?= el) eqn : D.
-        * trivial.
-        * destruct (edx ?= el) eqn : D2.
-          { trivial. }
-          { simpl in *. destruct IHcorrect2; try assumption; trivial. }
-          { simpl in *. destruct IHcorrect2; try assumption; trivial. }
-        * simpl in *. destruct (esx ?= el) eqn : D2.
-          { trivial. }
-          { simpl in *. destruct IHcorrect1; try assumption; trivial. }
-          { simpl in *. destruct IHcorrect1; try assumption; trivial. }
+      * simpl. rewrite IHcorrect2; trivial.
+      * simpl. rewrite IHcorrect1; trivial.
 Qed.
 
 Theorem insert_size2 :
@@ -358,34 +124,10 @@ Proof.
   intros.
   induction H.
   - trivial.
-  - simpl in *. destruct (el0 ?= el) eqn : D.
+  - simpl in *. destruct (e ?= el) eqn : D.
       * discriminate H0.
-      * trivial.
-      * trivial.
-  - simpl in *. destruct (el0 ?= el) eqn : D.
-      * discriminate H0.
-      * simpl in *. destruct (edx ?= el) eqn : D2.
-        { discriminate H0. }
-        { simpl in *. destruct IHcorrect; try assumption; trivial. }
-        { simpl in *. destruct IHcorrect; try assumption; trivial. }
-      * simpl. omega. 
-  - simpl in *. destruct (el0 ?= el) eqn : D.
-      * discriminate H0.
-      * simpl. rewrite <- plus_n_O. trivial.
-      * simpl in *. destruct (esx ?= el) eqn : D2.
-        { discriminate H0. }
-        { simpl in *. rewrite IHcorrect; try assumption; lia. }
-        { simpl in *. rewrite IHcorrect; try assumption; lia. }
-    - simpl in *. destruct (el0 ?= el) eqn : D.
-        * discriminate H0.
-        * destruct (edx ?= el) eqn : D2.
-          { discriminate H0. }
-          { simpl in *. rewrite IHcorrect2; try assumption; lia. }
-          { simpl in *. rewrite IHcorrect2; try assumption; lia. }
-        * simpl in *. destruct (esx ?= el) eqn : D2.
-          { discriminate H0. }
-          { simpl in *. rewrite IHcorrect1; try assumption; lia. }
-          { simpl in *. rewrite IHcorrect1; try assumption; lia. }
+      * simpl.  rewrite IHcorrect2; trivial. lia.
+      * simpl.  rewrite IHcorrect1; trivial. lia.
 Qed.
 
 Theorem insert_size :
@@ -395,70 +137,22 @@ Theorem insert_size :
       (isMember el bst = false -> size (insert el bst) = size bst + 1).
 Proof.
   intros.
-  induction H.
-  - split; intros.
-    + simpl in H. discriminate H.
-    + trivial.
-  - split; intros.
-    + simpl in *. destruct (el0 ?= el) eqn : D.
+  split; intros.
+  {
+    induction H.
+    - simpl in H0. discriminate H0.
+    - simpl in *. destruct (e ?= el) eqn : D.
       * trivial.
-      * discriminate H.
-      * discriminate H.
-    + simpl in *. destruct (el0 ?= el) eqn : D.
-      * discriminate H.
-      * trivial.
-      * trivial.
-  - split; intros.
-    + simpl in *. destruct (el0 ?= el) eqn : D.
-      * trivial.
-      * simpl in *. destruct (edx ?= el) eqn : D2.
-        { trivial. }
-        { simpl in *. destruct IHcorrect. apply H2 in H1. rewrite H1. trivial. }
-        { simpl in *. destruct IHcorrect. apply H2 in H1. rewrite H1. trivial. } 
-      * discriminate H1.
-    + simpl in *. destruct (el0 ?= el) eqn : D.
-      * discriminate H1.
-      * simpl in *. destruct (edx ?= el) eqn : D2.
-        { discriminate H1. }
-        { simpl in *. destruct IHcorrect. apply H3 in H1. rewrite H1. trivial. }
-        { simpl in *. destruct IHcorrect. apply H3 in H1. rewrite H1. trivial. }
-      * simpl. omega. 
-  - split; intros.
-    + simpl in *. destruct (el0 ?= el) eqn : D.
-      * trivial.
-      * discriminate H1.
-      * simpl in *. destruct (esx ?= el) eqn : D2.
-        { trivial. }
-        { simpl in *. destruct IHcorrect. apply H2 in H1. rewrite H1. trivial. }
-        { simpl in *. destruct IHcorrect. apply H2 in H1. rewrite H1. trivial. }
-    + simpl in *. destruct (el0 ?= el) eqn : D.
-      * discriminate H1.
-      * simpl. rewrite <- plus_n_O. trivial.
-      * simpl in *. destruct (esx ?= el) eqn : D2.
-        { discriminate H1. }
-        { simpl in *. destruct IHcorrect. apply H3 in H1. rewrite H1. omega. }
-        { simpl in *. destruct IHcorrect. apply H3 in H1. rewrite H1. omega. }
-    - split; intros.
-      + simpl in *. destruct (el0 ?= el) eqn : D.
-        * trivial.
-        * destruct (edx ?= el) eqn : D2.
-          { trivial. }
-          { simpl in *. destruct IHcorrect2. apply H4 in H3. rewrite H3. trivial. }
-          { simpl in *. destruct IHcorrect2. apply H4 in H3. rewrite H3. trivial. }
-        * simpl in *. destruct (esx ?= el) eqn : D2.
-          { trivial. }
-          { simpl in *. destruct IHcorrect1. apply H4 in H3. rewrite H3. trivial. }
-          { simpl in *. destruct IHcorrect1. apply H4 in H3. rewrite H3. trivial. }
-      + simpl in *. destruct (el0 ?= el) eqn : D.
-        * discriminate H3.
-        * destruct (edx ?= el) eqn : D2.
-          { discriminate H3. }
-          { simpl in *. destruct IHcorrect2. apply H5 in H3. rewrite H3. omega.  }
-          { simpl in *. destruct IHcorrect2. apply H5 in H3. rewrite H3. omega.  }
-        * simpl in *. destruct (esx ?= el) eqn : D2.
-          { discriminate H3. }
-          { simpl in *. destruct IHcorrect1. apply H5 in H3. rewrite H3. omega. }
-          { simpl in *. destruct IHcorrect1. apply H5 in H3. rewrite H3. omega. }
+      * simpl. rewrite IHcorrect2; trivial.
+      * simpl. rewrite IHcorrect1; trivial.
+  } { 
+    induction H.
+    - trivial. 
+    - simpl in *. destruct (e ?= el) eqn : D.
+      * discriminate H0.
+      * simpl. rewrite IHcorrect2; trivial. lia.
+      * simpl. rewrite IHcorrect1; trivial. lia.
+  }
 Restart.
   intros.
   split; intros.
@@ -471,12 +165,11 @@ Theorem toList_size :
     correct bst -> length (toList bst) = size bst.
 Proof.
   intros.
-  induction H.
-  - trivial.
-  - trivial.
-  - simpl in *. rewrite IHcorrect. omega.
-  - simpl in *. rewrite <- plus_n_O. rewrite <- IHcorrect. rewrite app_length. trivial.
-  - simpl in *. rewrite app_length. rewrite IHcorrect1. simpl. rewrite IHcorrect2. omega.
+  induction H; trivial.
+  simpl in *. 
+  rewrite <- IHcorrect1.
+  rewrite <- IHcorrect2.
+  rewrite app_length. simpl. lia.
 Qed.
 
 Theorem size_isEmpty :
@@ -489,13 +182,37 @@ Proof.
   {
     destruct H; inversion H0; trivial.
   } {
-    destruct H.
-      - trivial.
-      - inversion H0.
-      - simpl in *. destruct (size sdx); destruct (size ddx); inversion H0.
-      - simpl in *. destruct (size ssx); destruct (size dsx); inversion H0.
-      - simpl in *. destruct (size ssx); destruct (size dsx); inversion H0.
+    destruct H; trivial.
+    simpl in *. destruct (size sx); destruct (size dx); inversion H0.
   }
+Qed.
+
+
+Lemma eq1: 
+  forall e el,
+  (e =? el) = true <-> e = el.
+Proof.
+  intros. split; intros.
+  - apply beq_nat_true in H. assumption.
+  - subst. rewrite <- beq_nat_refl. trivial.
+Qed.
+
+Lemma eq2: 
+  forall e el,
+  (e ?= el) = Eq <-> e = el.
+Proof.
+  intros. split; intros.
+  - apply nat_compare_eq in H. assumption.
+  - apply Nat.compare_eq_iff. trivial.
+Qed.
+
+Lemma eq3 :
+  forall e el,
+  (e ?= el) = Eq <-> (e =? el) = true.
+Proof.
+  intros. split; intros.
+  - rewrite eq2 in H. rewrite eq1. trivial.
+  - rewrite eq2. rewrite eq1 in H. trivial.
 Qed.
 
 Theorem max_height :
@@ -504,80 +221,25 @@ Theorem max_height :
     (height bst ?= size(bst) = Lt \/ height bst ?= size(bst) = Eq).
 Proof.
   intros.
-    induction H; simpl in *.
-    - right. trivial.
-    - right. trivial.
-    - destruct IHcorrect.
-      + left. 
-        destruct (size sdx + size ddx + 1) eqn : D.
-        * discriminate H1.
-        * simpl in *. destruct n.
-          { simpl. assumption. }
-          { simpl. rewrite plus_comm. simpl. assumption. }
-      + right.
-        destruct (size sdx + size ddx + 1) eqn : D.
-        * discriminate H1.
-        * simpl in *. destruct n.
-          { simpl. assumption. }
-          { simpl. rewrite plus_comm. simpl. assumption. }
-    - destruct IHcorrect.
-      + left. rewrite <- plus_n_O.
-        destruct (size ssx + size dsx + 1) eqn : D.
-        * discriminate H1.
-        * simpl in *. destruct n.
-          { simpl. assumption. }
-          { simpl. rewrite plus_comm. simpl. assumption. }
-      + right. rewrite <- plus_n_O.
-        destruct (size ssx + size dsx + 1) eqn : D.
-        * discriminate H1.
-        * simpl in *. destruct n.
-          { simpl. assumption. }
-          { simpl. rewrite plus_comm. simpl. assumption. }
-    - destruct IHcorrect1;destruct IHcorrect2.
-      + left. destruct (size ssx + size dsx + 1).
-        * discriminate H3. 
-        * simpl in *. destruct (size sdx + size ddx + 1).
-          { discriminate H4. }
-          { destruct n; destruct n0; 
-              simpl;
-              rewrite <- nat_compare_lt;
-              rewrite <- nat_compare_lt in H3;
-              rewrite <- nat_compare_lt in H4;
-              lia.
-          }
-       + left. destruct (size ssx + size dsx + 1).
-        * discriminate H3. 
-        * simpl in *. destruct (size sdx + size ddx + 1).
-          { discriminate H4. }
-          { destruct n; destruct n0;
-              simpl;
-              rewrite <- nat_compare_lt in H3;
-              rewrite <- nat_compare_lt;
-              apply nat_compare_eq in H4;
-              lia.
-          }
-      + left. destruct (size ssx + size dsx + 1).
-        * discriminate H3. 
-        * simpl in *. destruct (size sdx + size ddx + 1).
-          { discriminate H4. }
-          { destruct n; destruct n0;
-              simpl;
-              rewrite <- nat_compare_lt in H4;
-              rewrite <- nat_compare_lt;
-              apply nat_compare_eq in H3;
-              lia.
-          }
-      + left. destruct (size ssx + size dsx + 1).
-        * discriminate H3. 
-        * simpl in *. destruct (size sdx + size ddx + 1).
-          { discriminate H4. }
-          { destruct n; destruct n0;
-              simpl;
-              apply nat_compare_eq in H4;
-              rewrite <- nat_compare_lt;
-              apply nat_compare_eq in H3;
-              lia.
-          }
+  induction H; simpl in *.
+  - right. trivial.
+  - destruct IHcorrect1; destruct IHcorrect2; 
+    simpl in *; destruct (size sx + size dx + 1) eqn : D; 
+    try lia; rewrite <- nat_compare_lt; rewrite eq2.
+    + rewrite <- nat_compare_lt in H3.
+      rewrite <- nat_compare_lt in H4.
+      lia.
+    + rewrite <- nat_compare_lt in H3.
+      apply nat_compare_eq in H4.
+      lia.
+    + apply nat_compare_eq in H3.
+      rewrite <- nat_compare_lt in H4.
+      lia.
+    + apply nat_compare_eq in H3.
+      apply nat_compare_eq in H4.
+      destruct n; rewrite plus_comm in D; inversion D.
+      * apply plus_is_O in H6. destruct H6. lia.
+      * destruct H6. lia.
 Qed.
 
 Theorem list_head_last :
@@ -589,69 +251,24 @@ Proof.
   intros.
   split.
   {
-    induction H.
-    - trivial.
-    - trivial.
-    - trivial.
-    - simpl in *. destruct ssx eqn:D.
-      + trivial.
-      + destruct (toList (Node b1 n b2) ++ esx :: toList dsx) eqn:D1. 
-        * inversion D1. destruct (toList b1); simpl in *; inversion H2. 
-        * assumption. 
-    - simpl in *. destruct ssx eqn:D.
-      + assumption.
-      + destruct (toList (Node b1 n b2) ++ esx :: toList dsx) eqn:D1. 
-        * inversion D1. destruct (toList b1); simpl in *; inversion H4. 
-        * assumption. 
-  } {
-    induction H.
-    - trivial.
-    - trivial.
-    - simpl in *. destruct ddx eqn:D.
-      + destruct (rev (toList sdx ++ edx :: toList empty)) eqn : D1.
-        * discriminate IHcorrect.
-        * trivial.
-      + destruct (rev (toList sdx ++ edx :: toList (Node b1 n b2))) eqn : D1.
-        * inversion D1. rewrite rev_app_distr in H2. 
-          assert (A: rev (edx :: toList b1 ++ n :: toList b2) = rev (n :: toList b2) ++ rev(edx :: toList b1)).
-            { simpl. rewrite rev_app_distr. simpl. rewrite  app_assoc. trivial. }
-            { rewrite A in H2. rewrite <- app_assoc in H2. destruct (toList b2).
-              { simpl in *. discriminate H2. }
-              { simpl in *. rewrite <- app_assoc in H2. rewrite <- app_assoc in H2. destruct (rev l); inversion  H2. }
-            }
-        * simpl in *. assumption.
-    - simpl in *. destruct dsx eqn:D.
-      + simpl. rewrite rev_app_distr. trivial.
-      + simpl. rewrite rev_app_distr. trivial.
-    - simpl in *. destruct ddx eqn:D.
-      + destruct (rev (toList sdx ++ edx :: toList empty)) eqn : D1.
-        * discriminate IHcorrect2.
-        * simpl in *. destruct dsx eqn:D2.
-          { simpl. repeat(rewrite rev_app_distr; simpl). trivial. }
-          { simpl. repeat(rewrite rev_app_distr; simpl). trivial. }
-      + destruct (rev (toList sdx ++ edx :: toList (Node b1 n b2))) eqn : D1.
-        * inversion D1. rewrite rev_app_distr in H4. 
-          assert (A: rev (edx :: toList b1 ++ n :: toList b2) = rev (n :: toList b2) ++ rev(edx :: toList b1)).
-            { simpl. rewrite rev_app_distr. simpl. rewrite  app_assoc. trivial. }
-            { rewrite A in H4. rewrite <- app_assoc in H4. destruct (toList b2).
-              { simpl in *. discriminate H4. }
-              { simpl in *. rewrite <- app_assoc in H4. rewrite <- app_assoc in H4. destruct (rev l); inversion  H4. }
-            }
-        * inversion D1. rewrite rev_app_distr in H4.  
-          assert (A: rev (edx :: toList b1 ++ n :: toList b2) = rev (n :: toList b2) ++ rev(edx :: toList b1)).
-            { simpl. rewrite rev_app_distr. simpl. rewrite  app_assoc. trivial. }
-            { rewrite A in H4. rewrite <- app_assoc in H4. simpl. destruct (toList b2).
-              {  simpl. repeat (rewrite rev_app_distr; simpl).
-                rewrite <- H4 in IHcorrect2. simpl in IHcorrect2. assumption.
-              }
-              {
-                simpl. repeat (rewrite rev_app_distr; simpl).
-                simpl. simpl in H4. 
-                rewrite <- app_assoc in H4. rewrite <- app_assoc in H4. destruct (rev l0).
-                { inversion H4. rewrite <- H4 in IHcorrect2. simpl in *. subst. assumption.  }
-                { inversion H4. rewrite <- H4 in IHcorrect2. simpl in *. subst. assumption.  }
-              }
-            }
+    induction H; trivial.
+    simpl in *.
+    destruct sx eqn:D; trivial.
+    destruct (toList (Node b1 n b2)) eqn:D1.
+    - inversion D1. destruct (toList b1); simpl in *; inversion H4.
+    - assumption.
+  }
+  {
+    induction H; trivial.
+    simpl in *.
+    rewrite rev_app_distr.
+    simpl. rewrite <- app_assoc. simpl.
+    destruct dx eqn:D; simpl in *; trivial.
+    destruct (rev (toList b1 ++ n :: toList b2)) eqn:D1; trivial.
+    simpl in *.
+    destruct (toList b1); simpl in *; inversion D1.
+    - destruct (rev (toList b2)); simpl in *; inversion H4.
+    - destruct (rev (l ++ n :: toList b2)); simpl in *; inversion H4.
   }
 Qed.
 
@@ -660,38 +277,22 @@ Theorem delete_correct :
     correct bst -> correct(delete a bst).
 Proof.
   intros.
-  destruct H.
-  - constructor.
-  - unfold delete. apply fromList_correct.
-  - unfold delete. apply fromList_correct.
-  - unfold delete. apply fromList_correct.
-  - unfold delete. apply fromList_correct.
+  destruct H; unfold delete; apply fromList_correct.
 Qed.
 
-Theorem delete_equals_delete2 :
-  forall bst el,
-    correct bst ->
-      BSTequals (delete el bst) (delete2 el bst) = true.
+Theorem delete2_correct :
+  forall a bst,
+    correct bst -> correct(delete2 a bst).
 Proof.
   intros.
   induction H.
-  - unfold delete. trivial.
-  - unfold delete. simpl. destruct (el0 =? el) eqn : D; simpl.
-    + apply beq_nat_true in D. subst.
-      destruct (el ?= el) eqn : D1.
-      * trivial.
-      * apply nat_compare_lt in D1. lia.
-      * apply nat_compare_gt in D1. lia.
-    + apply beq_nat_false in D.
-      destruct (el0 ?= el) eqn : D1.
-      * apply nat_compare_eq in D1. subst. lia. 
-      * unfold BSTequals. simpl. destruct (el0 =? el0) eqn:D2.
-        { trivial. }
-        { apply beq_nat_false in D2. lia. }
-      * unfold BSTequals. simpl. destruct (el0 =? el0) eqn:D2.
-        { trivial. }
-        { apply beq_nat_false in D2. lia. }
-  - unfold delete. unfold BSTequals. simpl. 
+  - constructor.
+  - simpl in *. destruct (e ?= a) eqn:D.
+    + destruct (getMin dx) eqn:D1; try assumption.
+      apply nat_compare_eq in D. subst.
+      admit.
+    + constructor; try assumption. admit.
+    + constructor; try assumption. admit.
 Admitted.
 
 Lemma insert_ismember2 :
@@ -707,19 +308,26 @@ Proof.
     apply nat_compare_eq in D. subst. lia.
   - simpl in *. destruct (n ?= b) eqn:D1.
     + assumption.
-    + simpl in *. destruct (n ?= a) eqn:D2.
-      * discriminate H0.
-      * apply IHbst2.
-        { apply child_correct in H. destruct H; assumption. }
-        { assumption. }
-      * assumption.
-    + simpl in *. destruct (n ?= a) eqn:D2.
-      * discriminate H0.
-      * assumption.
-      * apply IHbst1. 
-        { apply child_correct in H. destruct H; assumption. }
-        { assumption. }
+    + simpl in *. destruct (n ?= a) eqn:D2; try assumption.
+      * apply IHbst2; try assumption.
+        apply child_correct in H. destruct H; assumption.
+    + simpl in *. destruct (n ?= a) eqn:D2; try assumption.
+      * apply IHbst1; try assumption.
+        apply child_correct in H. destruct H; assumption.
 Qed.
+
+
+Theorem delete_equals_delete2 :
+  forall bst el,
+    correct bst ->
+      BSTequals (delete el bst) (delete2 el bst) = true.
+Proof.
+  intros.
+  induction H; unfold delete; trivial.
+  simpl in *. destruct (e =? el) eqn : D; simpl in *.
+  - rewrite <- eq3 in D. rewrite D. admit.
+  - admit.
+Admitted.
 
 Theorem delete_ismember :
   forall bst el,
@@ -727,29 +335,10 @@ Theorem delete_ismember :
 Proof.
   intros.
 (*   generalize dependent el. *)
-  induction H;intros. 
-  - trivial.
-  - unfold delete. simpl. destruct (el0 =? el) eqn : D.
-    + trivial.
-    + simpl. destruct (el0 ?= el) eqn : D1; trivial. apply nat_compare_eq  in D1. subst. 
-      apply beq_nat_false in D. lia.
-  - unfold delete in *. simpl. destruct (el0 =? el) eqn : D; simpl in *.
-    + apply beq_nat_true in D. subst. apply IHcorrect.
-    + apply beq_nat_false in D. apply insert_ismember2.
-      { apply fromList_correct. }
-      { assumption. }
-      { assumption. }
-  - unfold delete in *. simpl in *. destruct (toList ssx ++ esx :: toList dsx) eqn:D0.
-    + simpl. destruct (el0 =? el) eqn : D2; simpl in *.
-      * trivial.
-      * apply beq_nat_false in D2. destruct (el0 ?= el) eqn : D3; trivial.
-        apply nat_compare_eq in D3. lia.
-    + simpl. destruct (n =? el) eqn : D; simpl in *.
-      * apply beq_nat_true in D. subst. 
-        rewrite <- beq_nat_refl in IHcorrect. simpl in *.
-         admit.
-      * apply beq_nat_false in D. admit.
-  - admit.
+  induction H;intros; trivial.
+  unfold delete in *. simpl. destruct (toList sx).
+  - simpl. admit.
+  -  simpl. admit.
 Admitted.
 
 Theorem delete_size :
@@ -759,49 +348,22 @@ Theorem delete_size :
       (isMember el bst = false -> size (delete el bst) = size bst).
 Proof.
   intros.
-  split; intros.
-  2 : {
-    induction H; unfold delete in *; simpl in *; inversion H0; subst; trivial.
-    - destruct (el0 ?= el) eqn:D.
-      + discriminate H0.
-      + rewrite <- nat_compare_lt in D. destruct (el0 =? el) eqn:D1.
-        * apply beq_nat_true in D1; subst. lia.
-        * apply beq_nat_false in D1; subst. trivial.
-      + rewrite <- nat_compare_gt in D. destruct (el0 =? el) eqn:D1.
-        * apply beq_nat_true in D1; subst. lia.
-        * apply beq_nat_false in D1; subst. trivial.
-    - destruct (el0 ?= el) eqn:D.
-      + discriminate H3.
-      + rewrite <- nat_compare_lt in D. destruct (el0 =? el) eqn:D1.
-        * apply beq_nat_true in D1; subst. lia.
-        * apply beq_nat_false in D1; subst. simpl in *. destruct (edx ?= el) eqn:D2.
-          { discriminate H0. }
-          { apply IHcorrect in H0. admit. }
-          { apply IHcorrect in H0. admit. }
-      + rewrite <- nat_compare_gt in D. destruct (el0 =? el) eqn:D1.
-        * apply beq_nat_true in D1; subst. lia.
-        * apply beq_nat_false in D1; subst. trivial. admit.
-    - admit.
-    - admit.
-  }
+  unfold delete in *; split; intros.
   {
-    induction H.
-    - trivial.
-    - simpl. inversion H0; subst. destruct (el0 ?= el) eqn : D.
-      + apply nat_compare_eq in D. subst. unfold delete. simpl.
-        destruct (el =? el) eqn : D1.
-        * trivial.
-        * apply beq_nat_false in D1. lia.
-      + inversion H1.
-      + inversion H1.
-    - simpl in *. inversion H0; subst. unfold delete in *. destruct (el0 ?= el) eqn : D.
-      + apply nat_compare_eq in D. subst.  simpl in *.
-        destruct (el =? el) eqn : D1.
-        * simpl in *. rewrite H1 in IHcorrect. rewrite IHcorrect.
-          { lia. }
-        * apply beq_nat_false in D1. lia.
-      + inversion H1.
-      + inversion H1.
+    induction H; trivial.
+    simpl in *.
+    destruct (e ?= el) eqn : D.
+    - admit.
+    - apply IHcorrect2 in H0. admit.
+    - apply IHcorrect1 in H0. admit.
+  } {
+    induction H; trivial.
+    simpl in *.
+    destruct (e ?= el) eqn : D.
+    - admit.
+    - apply IHcorrect2 in H0. admit.
+    - apply IHcorrect1 in H0. admit.
+  }
 Admitted.
 
 Fixpoint not_in (l : list nat) (n : nat): bool :=
@@ -904,57 +466,17 @@ Theorem toList_distinct:
 Proof.
   intros.
   split; intros.
-  { induction H.
-    - trivial. 
-    - simpl in *. assumption.
-    - simpl in *. destruct (el ?= n) eqn : D.
-      + destruct (edx ?= n) eqn : D1.
-        * apply help4 in IHcorrect; trivial. apply help.
-      + destruct (edx ?= n) eqn : D1.
-        * apply IHcorrect. trivial.
-        * apply IHcorrect. assumption.
-        * apply IHcorrect. assumption.
-      + discriminate H0.
-    - simpl in *. destruct (el ?= n) eqn : D.
-      + admit.
-      + discriminate H0.
-      + destruct (esx ?= n) eqn : D1.
-        * admit.
-        * admit.
-        * admit.
-    - simpl in *. destruct (el ?= n) eqn : D.
-      + destruct (edx ?= n) eqn : D1. 
-        * destruct (esx ?= n) eqn : D2; admit.
-        * destruct (esx ?= n) eqn : D2; admit.
-        * destruct (esx ?= n) eqn : D2; admit.
-      + destruct (edx ?= n) eqn : D1.
-        * destruct (esx ?= n) eqn : D2.
-          { 
+  { induction H;trivial.
+    simpl in *. destruct (e ?= n) eqn : D.
+    - admit.
+    - apply IHcorrect2 in H0. admit.
+    - apply IHcorrect1 in H0. admit.
   } {
-    
-  }
-  
-  
-  
-  
-  induction H.
-  - split; intros.
-    + inversion H.
-    + trivial. 
-  - split; intros.
-    + simpl in *. destruct (el ?= n) eqn:D.
-      * trivial.
-      * discriminate H.
-      * discriminate H.
-    + simpl in *. destruct (el ?= n) eqn:D.
-      * discriminate H.
-      * trivial.
-      * trivial.
-  - destruct IHcorrect. split; intros.
-    + clear H2. simpl in *. destruct (el ?= n) eqn:D.
-      * simpl. destruct (edx ?= n) eqn:D1.
-        { apply nat_compare_eq in D. subst. rewrite D1 in H0. discriminate H0. }
-        { apply nat_compare_eq in D. subst. rewrite D1 in H0. discriminate H0. }
+    induction H;trivial.
+    simpl in *. destruct (e ?= n) eqn : D.
+    - admit.
+    - apply IHcorrect2 in H0. admit.
+    - apply IHcorrect1 in H0. admit.
 Admitted.
 
 Fixpoint sorted (l : list nat) : bool :=
@@ -971,25 +493,38 @@ Fixpoint sorted (l : list nat) : bool :=
         end
   end.
 
+Lemma el_mag_getmax_sx :
+  forall sx el dx max,
+    correct (Node sx el dx) ->
+    getMax sx = Some(max) ->
+    max ?= el = Lt.
+Proof.
+  intros.
+  induction H; trivial. 
+  - admit.
+Admitted.
+
+Lemma el_min_getmin_dx :
+  forall min sx el dx,
+  correct (Node sx el dx) ->
+    getMin dx = Some(min) ->
+    el ?= min = Lt.
+Proof.
+  intros.
+  induction H; trivial. 
+  - admit.
+Admitted.
+
 Theorem toList_sorted :
   forall bst,
     correct bst -> 
       sorted (toList bst) = true.
 Proof.
   intros.
-  induction H.
-  - trivial.
-  - trivial.
-  - simpl in *. destruct (toList sdx ++ edx :: toList ddx) eqn : D.
-    + trivial.
-    + rewrite IHcorrect. destruct (el ?= n) eqn:D1; trivial.
-      * admit. 
-      * admit. 
-  - destruct (toList (Node ssx esx dsx)) eqn : D.
-    + inversion D. simpl. rewrite H2. trivial.
-    + simpl in *.
-      destruct (toList ssx); destruct (toList dsx); simpl in *.
-      * rewrite H0. trivial.
-      * inversion D. subst. destruct (n ?= n0) eqn : D1.
-        { discriminate IHcorrect. }
+  induction H; trivial.
+  simpl in *. 
+  destruct (toList sx) eqn : D1; simpl in *.
+  destruct (toList dx) eqn : D2; simpl in *; trivial; rewrite IHcorrect2. 
+  - admit.
+  - admit.
 Admitted.

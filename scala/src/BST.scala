@@ -100,25 +100,15 @@ object bst_operation {
 
     def BSTequals(bst1 : BST)(bst2 : BST) : Boolean = list_beq(toList(bst1))(toList(bst2))
   
+    def correct_on_sx(root : nat)(sx : BST) : Boolean =
+        (toList(sx)).forall(_ < root)
+    
+    def correct_on_dx(root : nat)(dx : BST) : Boolean =
+        (toList(dx)).forall(root < _)
+
     def correct_fun(bst : BST) : Boolean = bst match {
         case Empty => true
-        case Node(sx, e, dx) => (sx, dx) match {
-              case (Empty, Empty) => true
-              case (Node(ssx, esx, dsx), Empty) => 
-                  compare(esx, e) match { 
-                    case Lt => correct_fun(sx)
-                    case _ => false
-                  }
-              case (Empty, Node(sdx, edx, ddx)) => 
-                  compare(edx, e) match {
-                    case Gt => correct_fun(dx)
-                    case _ => false
-                  }
-              case (Node(ssx, esx, dsx), Node(sdx, edx, ddx)) => 
-                  (compare(esx, e), compare(edx, e)) match {
-                    case (Lt, Gt) => (correct_fun(sx)) && (correct_fun(dx))
-                    case _ => false
-                  }
-            }
-      }
+        case Node(sx, e, dx) =>
+            correct_on_sx(e)(sx) && correct_fun(sx) && correct_on_dx(e)(dx) && correct_fun(dx)
+    }
 }
