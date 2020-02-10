@@ -5,21 +5,21 @@ import src.nat_operation._
 import scala.math.max
 
 sealed trait BST 
-case class Node(sx : BST, el : nat, dx : BST) extends BST
+case class Node(l : BST, el : nat, r : BST) extends BST
 case object Empty extends BST
 
 object bst_operation {
     implicit def toString(bst : BST) : String = bst match {
         case Empty => "empty"
-        case Node(sx, el, dx) => "(" + sx + el + dx + ")" 
+        case Node(l, el, r) => "(" + l + el + r + ")" 
     }
     
     def insert (El : nat) (bst : BST) : BST = bst match {
         case Empty => Node(Empty, El, Empty)
-        case Node(sx, el, dx) => compare(el, El) match {
+        case Node(l, el, r) => compare(el, El) match {
             case Eq => bst
-            case Lt => Node(sx, el, insert(El)(dx))
-            case Gt => Node(insert(El)(sx), el, dx)
+            case Lt => Node(l, el, insert(El)(r))
+            case Gt => Node(insert(El)(l), el, r)
         }
     }
     
@@ -30,12 +30,12 @@ object bst_operation {
     
     def height(bst:BST) : nat = bst match {
         case Empty => 0
-        case Node(sx, _, dx) => max(height(sx), height(dx)) + 1
+        case Node(l, _, r) => max(height(l), height(r)) + 1
     }
     
     def size(bst : BST) : nat = bst match {
         case Empty => 0
-        case Node(sx, _, dx) => size(sx) + size(dx) + 1
+        case Node(l, _, r) => size(l) + size(r) + 1
     }
     
     def isEmpty(bst : BST) : Boolean = bst match {
@@ -45,42 +45,42 @@ object bst_operation {
     
     def toList(bst : BST) : List[nat] = bst match {
         case Empty => Nil
-        case Node(sx, el, dx) => toList(sx) ++ (el :: Nil) ++ toList(dx)
+        case Node(l, el, r) => toList(l) ++ (el :: Nil) ++ toList(r)
     }
     
     def getMin(bst : BST) : Option[nat] = bst match {
         case Empty => None
         case Node(Empty, el, _) => Some(el)
-        case Node(sx, _, _) => getMin(sx)
+        case Node(l, _, _) => getMin(l)
     }
 
     def getMax(bst : BST) : Option[nat] = bst match {
         case Empty => None
         case Node(_, el, Empty) => Some(el)
-        case Node(_, _, dx) => getMax(dx) 
+        case Node(_, _, r) => getMax(r) 
     }
 
     def isMember(El : nat)(bst : BST) : Boolean = bst match {
         case Empty => false
-        case Node(sx, el, dx) =>
+        case Node(l, el, r) =>
             compare(el, El) match {
               case Eq => true
-              case Lt => isMember(El)(dx)
-              case Gt => isMember(El)(sx)
+              case Lt => isMember(El)(r)
+              case Gt => isMember(El)(l)
             }
     }
 
     def delete2(El : nat)(bst : BST) : BST = bst match {
         case Empty => bst
-        case Node(sx, el, dx) =>
+        case Node(l, el, r) =>
             compare(el, El) match {
               case Eq => 
-                  getMin(dx) match {
-                    case None => sx
-                    case Some(min) => Node(sx, min, (delete2(min)(dx)))
+                  getMin(r) match {
+                    case None => l
+                    case Some(min) => Node(l, min, (delete2(min)(r)))
                   }
-              case Lt => Node(sx, el, (delete2(El)(dx)))
-              case Gt => Node(delete2(El)(sx), el, dx)
+              case Lt => Node(l, el, (delete2(El)(r)))
+              case Gt => Node(delete2(El)(l), el, r)
             }
     }
     
@@ -100,15 +100,15 @@ object bst_operation {
 
     def BSTequals(bst1 : BST)(bst2 : BST) : Boolean = list_beq(toList(bst1))(toList(bst2))
   
-    def correct_on_sx(root : nat)(sx : BST) : Boolean =
-        (toList(sx)).forall(_ < root)
+    def correct_on_l(root : nat)(l : BST) : Boolean =
+        (toList(l)).forall(_ < root)
     
-    def correct_on_dx(root : nat)(dx : BST) : Boolean =
-        (toList(dx)).forall(root < _)
+    def correct_on_r(root : nat)(r : BST) : Boolean =
+        (toList(r)).forall(root < _)
 
     def correct_fun(bst : BST) : Boolean = bst match {
         case Empty => true
-        case Node(sx, e, dx) =>
-            correct_on_sx(e)(sx) && correct_fun(sx) && correct_on_dx(e)(dx) && correct_fun(dx)
+        case Node(l, e, r) =>
+            correct_on_l(e)(l) && correct_fun(l) && correct_on_r(e)(r) && correct_fun(r)
     }
 }

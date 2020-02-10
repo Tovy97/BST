@@ -34,9 +34,25 @@ object BST_Specification extends Properties("BST") {
         else true
     }
   
-    property("child_correct") = forAll(genTree, genTree, genNat) { (sx : BST, dx : BST, el : nat) =>
-        if (correct_fun(Node(sx, el, dx)))
-            correct_fun(sx) && correct_fun(dx)
+    property("child_correct") = forAll(genTree, genTree, genNat) { (l : BST, r : BST, el : nat) =>
+        if (correct_fun(Node(l, el, r)))
+            correct_fun(l) && correct_fun(r)
+        else true
+    }
+    
+    property("insert_correct_on_r") = forAll(genNat, genNat, genTree) { (e : nat, a : nat, bst : BST) =>
+        if (e < a)
+            if (correct_on_r(e)(bst) == true)
+                correct_on_r(e)(insert(a)(bst)) == true
+            else true
+        else true
+    }
+    
+    property("insert_correct_on_l") = forAll(genNat, genNat, genTree) { (e : nat, a : nat, bst : BST) =>
+        if (a < e)
+            if (correct_on_l(e)(bst) == true)
+                correct_on_l(e)(insert(a)(bst)) == true
+            else true
         else true
     }
 
@@ -106,18 +122,18 @@ object BST_Specification extends Properties("BST") {
         } else true
     }
     
-    property("delete2_sx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
-        if (correct_fun(Node(sx, el, dx))) {
+    property("delete2_l") = forAll(genTree, genTree, genNat, genNat) { (l : BST, r : BST, a : nat, el : nat) =>
+        if (correct_fun(Node(l, el, r))) {
             if (compare(el, a) == Gt) {
-                delete2(a)(Node(sx, el, dx)) == Node(delete2(a)(sx), el, dx)
+                delete2(a)(Node(l, el, r)) == Node(delete2(a)(l), el, r)
             } else true
         } else true
     }
 
-    property("delete2_dx") = forAll(genTree, genTree, genNat, genNat) { (sx : BST, dx : BST, a : nat, el : nat) =>
-        if (correct_fun(Node(sx, el, dx))) {
+    property("delete2_r") = forAll(genTree, genTree, genNat, genNat) { (l : BST, r : BST, a : nat, el : nat) =>
+        if (correct_fun(Node(l, el, r))) {
             if (compare(el, a) == Lt) {
-                delete2(a)(Node(sx, el, dx)) == Node(sx, el, delete2(a)(dx))
+                delete2(a)(Node(l, el, r)) == Node(l, el, delete2(a)(r))
             } else true
         } else true
     }

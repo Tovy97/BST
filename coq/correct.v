@@ -61,6 +61,54 @@ Proof.
   destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
 Qed.
 
+Lemma insert_correct_on_r :
+  forall e a bst,
+    e < a ->
+    correct_on_r e bst = true ->
+    correct_on_r e (insert a bst) = true.
+Proof.
+  intros.
+  induction bst; unfold correct_on_r in *; simpl in *.
+  - rewrite <- Nat.ltb_lt in H. rewrite andb_true_iff.
+    split; try assumption; trivial.
+  - destruct (n ?= a) eqn:D; simpl.
+    + assumption.
+    + rewrite forallb_app. rewrite forallb_app in H0.
+      rewrite andb_true_iff. rewrite andb_true_iff in H0. destruct H0.
+      split.
+      * assumption.
+      * apply IHbst1 in H0. simpl. rewrite andb_true_iff. 
+        split; simpl in H1; rewrite andb_true_iff in H1; 
+        destruct H1; try apply IHbst2 in H2; assumption.
+    + rewrite forallb_app. rewrite forallb_app in H0.
+      rewrite andb_true_iff. rewrite andb_true_iff in H0. destruct H0.
+      split; try apply IHbst1 in H0; assumption. 
+Qed.
+
+Lemma insert_correct_on_l :
+  forall e a bst,
+    a < e ->
+    correct_on_l e bst = true ->
+    correct_on_l e (insert a bst) = true.
+Proof.
+  intros.
+  induction bst; unfold correct_on_l in *; simpl in *.
+  - rewrite <- Nat.ltb_lt in H. rewrite andb_true_iff.
+    split; try assumption; trivial.
+  - destruct (n ?= a) eqn:D; simpl.
+    + assumption.
+    + rewrite forallb_app. rewrite forallb_app in H0.
+      rewrite andb_true_iff. rewrite andb_true_iff in H0. destruct H0.
+      split.
+      * assumption.
+      * apply IHbst1 in H0. simpl. rewrite andb_true_iff. 
+        split; simpl in H1; rewrite andb_true_iff in H1; 
+        destruct H1; try apply IHbst2 in H2; assumption.
+    + rewrite forallb_app. rewrite forallb_app in H0.
+      rewrite andb_true_iff. rewrite andb_true_iff in H0. destruct H0.
+      split; try apply IHbst1 in H0; assumption. 
+Qed.
+
 Theorem insert_correct :
   forall a bst,
     correct bst -> correct(insert a bst).
@@ -72,10 +120,10 @@ Proof.
     + constructor; assumption.
     + constructor; try assumption.
       apply nat_compare_lt in D.
-      admit.
+      apply insert_correct_on_r; assumption.
     + constructor; try assumption. apply nat_compare_gt in D.
-      admit.
-Admitted.
+      apply insert_correct_on_l; assumption.
+Qed.
 
 Theorem fromList_correct :
   forall l,
@@ -187,7 +235,6 @@ Proof.
     simpl in *. destruct (size l); destruct (size r); inversion H0.
   }
 Qed.
-
 
 Lemma eq1: 
   forall e el,
