@@ -32,32 +32,32 @@ Proof.
 Qed.
 
 Theorem child_correct :
-  forall el sx dx,
-    correct (Node sx el dx) -> correct sx /\ correct dx.
+  forall el l r,
+    correct (Node l el r) -> correct l /\ correct r.
 Proof.
   intros.
   split; inversion H; subst; assumption.
 Qed.
 
-Theorem delete2_sx :
-  forall sx dx a el,
-    correct (Node sx el dx) -> 
+Theorem delete2_l :
+  forall l r a el,
+    correct (Node l el r) -> 
       el ?= a = Gt -> 
-      delete2 a (Node sx el dx) = Node (delete2 a sx) el dx.
+      delete2 a (Node l el r) = Node (delete2 a l) el r.
 Proof.
   intros.
-  remember (Node sx el dx) as bst eqn:R.
+  remember (Node l el r) as bst eqn:R.
   destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
 Qed.
 
-Theorem delete2_dx :
-  forall sx dx a el,
-    correct (Node sx el dx) -> 
+Theorem delete2_r :
+  forall l r a el,
+    correct (Node l el r) -> 
       el ?= a = Lt -> 
-      delete2 a (Node sx el dx) = Node sx el (delete2 a dx).
+      delete2 a (Node l el r) = Node l el (delete2 a r).
 Proof.
   intros.
-  remember (Node sx el dx) as bst eqn:R.
+  remember (Node l el r) as bst eqn:R.
   destruct H; simpl; inversion R; subst; try rewrite H0; trivial.
 Qed.
 
@@ -66,11 +66,12 @@ Theorem insert_correct :
     correct bst -> correct(insert a bst).
 Proof.
   intros.
-  induction H; simpl.
+  induction H; simpl in *.
   - constructor; trivial; try constructor.
   - destruct (e ?= a) eqn:D.
     + constructor; assumption.
     + constructor; try assumption.
+      apply nat_compare_lt in D.
       admit.
     + constructor; try assumption. apply nat_compare_gt in D.
       admit.
@@ -183,7 +184,7 @@ Proof.
     destruct H; inversion H0; trivial.
   } {
     destruct H; trivial.
-    simpl in *. destruct (size sx); destruct (size dx); inversion H0.
+    simpl in *. destruct (size l); destruct (size r); inversion H0.
   }
 Qed.
 
@@ -224,7 +225,7 @@ Proof.
   induction H; simpl in *.
   - right. trivial.
   - destruct IHcorrect1; destruct IHcorrect2; 
-    simpl in *; destruct (size sx + size dx + 1) eqn : D; 
+    simpl in *; destruct (size l + size r + 1) eqn : D; 
     try lia; rewrite <- nat_compare_lt; rewrite eq2.
     + rewrite <- nat_compare_lt in H3.
       rewrite <- nat_compare_lt in H4.
@@ -253,7 +254,7 @@ Proof.
   {
     induction H; trivial.
     simpl in *.
-    destruct sx eqn:D; trivial.
+    destruct l eqn:D; trivial.
     destruct (toList (Node b1 n b2)) eqn:D1.
     - inversion D1. destruct (toList b1); simpl in *; inversion H4.
     - assumption.
@@ -263,12 +264,12 @@ Proof.
     simpl in *.
     rewrite rev_app_distr.
     simpl. rewrite <- app_assoc. simpl.
-    destruct dx eqn:D; simpl in *; trivial.
+    destruct r eqn:D; simpl in *; trivial.
     destruct (rev (toList b1 ++ n :: toList b2)) eqn:D1; trivial.
     simpl in *.
     destruct (toList b1); simpl in *; inversion D1.
     - destruct (rev (toList b2)); simpl in *; inversion H4.
-    - destruct (rev (l ++ n :: toList b2)); simpl in *; inversion H4.
+    - destruct (rev (l0 ++ n :: toList b2)); simpl in *; inversion H4.
   }
 Qed.
 
@@ -288,7 +289,7 @@ Proof.
   induction H.
   - constructor.
   - simpl in *. destruct (e ?= a) eqn:D.
-    + destruct (getMin dx) eqn:D1; try assumption.
+    + destruct (getMin r) eqn:D1; try assumption.
       apply nat_compare_eq in D. subst.
       admit.
     + constructor; try assumption. admit.
@@ -336,7 +337,7 @@ Proof.
   intros.
 (*   generalize dependent el. *)
   induction H;intros; trivial.
-  unfold delete in *. simpl. destruct (toList sx).
+  unfold delete in *. simpl. destruct (toList l).
   - simpl. admit.
   -  simpl. admit.
 Admitted.
@@ -493,10 +494,10 @@ Fixpoint sorted (l : list nat) : bool :=
         end
   end.
 
-Lemma el_mag_getmax_sx :
-  forall sx el dx max,
-    correct (Node sx el dx) ->
-    getMax sx = Some(max) ->
+Lemma el_mag_getmax_l :
+  forall l el r max,
+    correct (Node l el r) ->
+    getMax l = Some(max) ->
     max ?= el = Lt.
 Proof.
   intros.
@@ -504,10 +505,10 @@ Proof.
   - admit.
 Admitted.
 
-Lemma el_min_getmin_dx :
-  forall min sx el dx,
-  correct (Node sx el dx) ->
-    getMin dx = Some(min) ->
+Lemma el_min_getmin_r :
+  forall min l el r,
+  correct (Node l el r) ->
+    getMin r = Some(min) ->
     el ?= min = Lt.
 Proof.
   intros.
@@ -523,8 +524,8 @@ Proof.
   intros.
   induction H; trivial.
   simpl in *. 
-  destruct (toList sx) eqn : D1; simpl in *.
-  destruct (toList dx) eqn : D2; simpl in *; trivial; rewrite IHcorrect2. 
+  destruct (toList l) eqn : D1; simpl in *.
+  destruct (toList r) eqn : D2; simpl in *; trivial; rewrite IHcorrect2. 
   - admit.
   - admit.
 Admitted.

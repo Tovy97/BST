@@ -12,16 +12,16 @@ Inductive BST : Type :=
   | Node : BST -> nat -> BST -> BST.
 
 Notation "'empty'" := Empty.
-Notation "'(' s e d ')'" := (Node s e d).
+Notation "'(' l e r ')'" := (Node l e r).
 
 Fixpoint insert (El : nat) (bst : BST) : BST :=
   match bst with
     | Empty => Node Empty El Empty
-    | Node sx el dx =>
+    | Node l el r =>
         match el ?= El with
           | Eq => bst
-          | Lt => Node sx el (insert El dx)
-          | Gt => Node (insert El sx) el dx
+          | Lt => Node l el (insert El r)
+          | Gt => Node (insert El l) el r
         end
   end.
 
@@ -34,13 +34,13 @@ Fixpoint fromList (l : list nat) : BST :=
 Fixpoint height (bst : BST) : nat :=
   match bst with
     | Empty => 0
-    | Node sx _ dx => 1 + (max (height sx) (height dx))
+    | Node l _ r => 1 + (max (height l) (height r))
   end.
 
 Fixpoint size (bst : BST) : nat :=
   match bst with
     | Empty => 0
-    | Node sx _ dx => (size sx) + (size dx) + 1
+    | Node l _ r => (size l) + (size r) + 1
   end.
 
 Definition isEmpty (bst : BST) : bool :=
@@ -52,46 +52,46 @@ Definition isEmpty (bst : BST) : bool :=
 Fixpoint toList (bst : BST) : list nat := 
   match bst with
     | Empty => nil
-    | Node sx el dx => toList(sx) ++ (el :: nil) ++ toList(dx)
+    | Node l el r => toList(l) ++ (el :: nil) ++ toList(r)
   end.
 
 Fixpoint getMin (bst : BST) : option(nat) :=
   match bst with
     | Empty => None
     | Node Empty el _ => Some el
-    | Node sx _ _ => getMin sx 
+    | Node l _ _ => getMin l 
   end.
 
 Fixpoint getMax (bst : BST) : option(nat) :=
   match bst with
     | Empty => None
     | Node _ el Empty => Some el
-    | Node _ _ dx => getMax dx 
+    | Node _ _ r => getMax r 
   end.
 
 Fixpoint isMember (El : nat) (bst : BST) : bool :=
   match bst with
     | Empty => false
-    | Node sx el dx =>
+    | Node l el r =>
         match el ?= El with
           | Eq => true
-          | Lt => isMember El dx
-          | Gt => isMember El sx
+          | Lt => isMember El r
+          | Gt => isMember El l
         end
   end.
 
 Fixpoint delete2 (El : nat) (bst : BST) : BST :=
   match bst with
     | Empty => bst
-    | Node sx el dx =>
+    | Node l el r =>
         match el ?= El with
           | Eq => 
-              match getMin(dx) with
-                | None => sx
-                | Some min => Node sx min (delete2 min dx)
+              match getMin(r) with
+                | None => l
+                | Some min => Node l min (delete2 min r)
               end
-          | Lt => Node sx el (delete2 El dx)
-          | Gt => Node (delete2 El sx) el dx
+          | Lt => Node l el (delete2 El r)
+          | Gt => Node (delete2 El l) el r
         end
   end.
 
@@ -113,26 +113,26 @@ Definition BSTequals(bst1 : BST)(bst2 : BST) : bool :=
 Definition delete (El : nat) (bst : BST) : BST :=
   fromList(filter (fun el => negb (beq_nat el El)) (toList bst)).
 
-Definition correct_on_sx(root : nat)(sx : BST) : bool :=
-  forallb (fun el => el <? root)(toList sx).
+Definition correct_on_l(root : nat)(l : BST) : bool :=
+  forallb (fun el => el <? root)(toList l).
 
-Definition correct_on_dx(root : nat)(dx : BST) : bool :=
-  forallb (fun el => root <? el)(toList dx).
+Definition correct_on_r(root : nat)(r : BST) : bool :=
+  forallb (fun el => root <? el)(toList r).
 
 Fixpoint correct_fun (bst : BST) : bool :=
   match bst with
     | Empty => true
-    | Node sx e dx =>
-        correct_on_sx e sx && correct_fun sx &&
-        correct_on_dx e dx && correct_fun dx
+    | Node l e r =>
+        correct_on_l e l && correct_fun l &&
+        correct_on_r e r && correct_fun r
   end.
 
 Inductive correct : BST -> Prop :=
   | cor_empty : correct Empty
   | cor_node : 
-      forall sx e dx,
-        correct_on_sx e sx = true ->
-        correct sx ->
-        correct_on_dx e dx = true ->
-        correct dx ->
-        correct (Node sx e dx).
+      forall l e r,
+        correct_on_l e l = true ->
+        correct l ->
+        correct_on_r e r = true ->
+        correct r ->
+        correct (Node l e r).
